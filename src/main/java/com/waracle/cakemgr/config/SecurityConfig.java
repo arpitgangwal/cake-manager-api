@@ -40,8 +40,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
         auth.userDetailsService(userService);
     }
+
     @Bean
-    public PasswordEncoder passwordEncoder(){
+    public PasswordEncoder passwordEncoder() {
         return NoOpPasswordEncoder.getInstance();
     }
 
@@ -53,16 +54,16 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-        http.csrf().disable().authorizeRequests().antMatchers("/swagger-ui*/**","/jwt-token")
-                .permitAll().anyRequest().authenticated()
-                .and().sessionManagement()
-                .sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+        http.csrf().disable();
+        http.formLogin().disable();
+        http.httpBasic().disable();
+
         http.addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
         http.exceptionHandling().accessDeniedHandler(new AccessDeniedHandlerImpl() {
             @Override
             public void handle(HttpServletRequest request, HttpServletResponse response, AccessDeniedException accessDeniedException) throws IOException, ServletException {
                 super.handle(request, response, accessDeniedException);
-               throw new BadCredentialsException(accessDeniedException.getCause().getMessage());
+                throw new BadCredentialsException(accessDeniedException.getCause().getMessage());
 
             }
 
@@ -71,16 +72,30 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 super.setErrorPage(errorPage);
             }
         });
+        http
+                .authorizeRequests()
+                .antMatchers("/cakes" ,"/")
+                .authenticated()
+                .and()
+                .sessionManagement()
+                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                .and()
+                .authorizeRequests()
+                .antMatchers("/v3/api-docs", "/jwt-token", "/configuration/ui", "/swagger-resources/**", "/configuration/security","/swagger-ui.html", "/webjars/**")
+                .permitAll()
 
+                ;
     }
-    @Override
-    public void configure(WebSecurity web) throws Exception {
-        web.ignoring().antMatchers("/v3/api-docs",
-                "/configuration/ui",
-                "/swagger-resources/**",
-                "/configuration/security",
-                "/swagger-ui.html",
-                "/webjars/**");
-    }
+
+//    @Override
+//    public void configure(WebSecurity web) throws Exception {
+//        web.ignoring().antMatchers("/v3/api-docs");
+//        web.ignoring().antMatchers("/configuration/ui");
+//        web.ignoring().antMatchers("/swagger-resources/**");
+//        web.ignoring().antMatchers("/configuration/security");
+//        web.ignoring().antMatchers("/swagger-ui.html");
+//        web.ignoring().antMatchers("/webjars/**");
+//        web.ignoring().antMatchers("/jwt-token");
+//    }
 
 }

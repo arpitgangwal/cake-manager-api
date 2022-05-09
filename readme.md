@@ -24,3 +24,5 @@ Post /jwt-token with body
   "userName": "user1",
   "password": "pwd1"
 }
+****Cucumber Test:
+Present in package com.waracle.cakemgr.cucumber

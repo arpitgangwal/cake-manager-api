@@ -1,0 +1,45 @@
+stages:
+  - Resolve dependencies and build
+  - Containerise and publish image
+  - Publish Artifact
+
+Variables:
+  GIT_STRATEGY: clone
+  ARTIFACTORY_URL: http://example.com/
+
+Resolve dependencies and build:
+  stage: Resolve dependencies and build
+  script:
+    - mvn -Dskip.testd=true -P executable-spring-boot clean package
+  tags:
+    - build-artifact
+  artifacts:
+    paths:
+      - ./target/$CI_PROJECT_NAME.jar
+      - ./target/site/*
+      - ./target/surefire-reports/*.xml
+      - ./target/jaoco-output/*
+    reports:
+      junit: ./target/surefire-reports/*.xml
+    expire_in: 1 hour
+  only:
+    - merge_request
+    - tags
+
+Containerise and publish image:
+   stage: Containerise and publish image
+   dependencies:
+     - Resolve dependencies and build
+   script:
+     - MVN_VERSION= $(mvn -q -Dexec.executable=echo -Dexec.args='${project.version}'  --non-recursive exec:exec)
+     - docker build -t $CI_PROJECT_NAME:${MVN_VERSION} .
+   only:
+     - merge_request
+     - tags
+
+Publish Artifact:
+  stage: Publish artifact
+  script:
+    - mvn package -Dmave.tet.skip deploy:deploy -DaltDeploymentRepository=artifactpry::default::$ARTIFACTORY_URL
+  only:
+    - merge_request

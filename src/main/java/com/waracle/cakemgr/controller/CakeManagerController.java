@@ -10,10 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
@@ -22,19 +19,20 @@ import java.util.List;
 @RestController
 @Slf4j
 @SecurityRequirement(name="Authentication")
+@RequestMapping(path = "/cakes")
 public class CakeManagerController {
     private CakeService cakeService;
     public CakeManagerController(CakeService cakeService) {
         this.cakeService = cakeService;
     }
 
-    @PostMapping(path = "/cakes", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<CakeResponseDto> createCreditCard(@Validated @RequestBody CakeRequestDto cakeRequestDto) throws ParseException {
+    @PostMapping(path = "/add", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<CakeResponseDto> createCreditCard(@Validated @RequestBody CakeRequestDto cakeRequestDto)  {
         log.info("Got cake added request");
         return ResponseEntity.status(HttpStatus.CREATED).body(cakeService.addCake(cakeRequestDto));
     }
 
-    @GetMapping(path = "/cakes", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(path = "/list", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<List<CakeResponseDto>>getCreditCardList() {
          log.info("Request received for listing all cakes");
         return ResponseEntity.status(HttpStatus.OK).body(cakeService.getAllCakes());

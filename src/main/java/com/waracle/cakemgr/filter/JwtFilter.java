@@ -26,7 +26,7 @@ public class JwtFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, FilterChain filterChain) throws ServletException, IOException {
 
-        String authorizationHeader = httpServletRequest.getHeader("jwt-token");
+        String authorizationHeader = httpServletRequest.getHeader("Authorization");
         String token = null;
         String userName = null;
 
@@ -52,7 +52,7 @@ public class JwtFilter extends OncePerRequestFilter {
         filterChain.doFilter(httpServletRequest, httpServletResponse);
     }
 
-    protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
+    protected boolean shouldNotFilter(HttpServletRequest request)  {
         return request.getRequestURI().contains("swagger");
     }
 }
